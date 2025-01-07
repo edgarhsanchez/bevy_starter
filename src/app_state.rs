@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-use bevy_ratatui::event::{self, KeyEvent, MouseEvent};
+use bevy_ratatui::{error::exit_on_error, event::{self, KeyEvent, MouseEvent}, terminal::RatatuiContext};
+use crossterm::event::KeyEventKind;
 use ratatui::{
     buffer::Buffer,
     layout::Rect,
@@ -12,6 +13,7 @@ use ratatui::{
 pub enum AppState {
     #[default]
     Home,
+    Options,
 }
 
 #[derive(Debug, Clone, Event, PartialEq, Eq)]
@@ -21,13 +23,13 @@ pub enum HomeEvent {
 }
 
 impl WidgetRef for AppState {
-    fn render_ref(&self, area: Rect, buf: &mut Buffer) {
+    fn render_ref(&self, area: Rect, buf: &mut Buffer) {        
         match self {
-            AppState::Home => {
+            AppState::Home | AppState::Options => {
                 Block::default()
-                    .title("Home")
-                    .borders(Borders::ALL)
-                    .render_ref(area, buf);
+                .title("Home")
+                .borders(Borders::ALL)
+                .render_ref(area, buf);
             }
         }
     }
@@ -38,22 +40,44 @@ pub struct AppPlugin;
 impl Plugin for AppPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<HomeEvent>()
-            .add_systems(PreUpdate, home_events_handler);
+            .init_state::<AppState>()
+            .add_systems(PreUpdate, home_events_handler)
+            .add_systems(Update, render_home.pipe(exit_on_error));
     }
 }
 
-fn home_events_handler(
-    mut app_state: ResMut<State<AppState>>,
+fn render_home(
+    app_state: Res<State<AppState>>,
+    mut context: ResMut<RatatuiContext>,
+) -> color_eyre::Result<()> {
+    context.draw(|frame| {
+        let area = frame.area();
+        frame.render_widget(app_state.get(), area);
+    })?;
+    Ok(())
+}
+
+fn home_events_handler(    
     mut home_events: EventReader<HomeEvent>,
+    mut app_exit: EventWriter<AppExit>,
 ) {
-    let home_event = home_events.read();
-    for event in home_event {
-        match  event {
-            HomeEvent::MouseEvent(event) =>{
-                
+    for event in home_events.read() {
+        match event {
+            HomeEvent::MouseEvent(mouse_event) => {
+                // do nothing
             }
-            HomeEvent::KeyEvent(event) =>{
-    
+            HomeEvent::KeyEvent(key_event) => {
+                match key_event.kind {
+                    KeyEventKind::Release => {
+                        match key_event.code {
+                            crossterm::event::KeyCode::Char('q') | crossterm::event::KeyCode::Esc => {
+                                app_exit.send_default();
+                            }
+                            _ => {}
+                        }
+                    }
+                    _ => {}
+                }
             }
         }
     }
