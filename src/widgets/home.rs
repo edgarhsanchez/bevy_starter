@@ -62,7 +62,7 @@ fn home_events_handler(
     for event in home_events.read() {
         match event {
             HomeEvent::MouseEvent(mouse_event) => {
-                // do nothing
+                // nothing
             }
             HomeEvent::KeyEvent(key_event) => {
                 match key_event.kind {

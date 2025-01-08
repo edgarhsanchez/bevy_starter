@@ -32,7 +32,11 @@ use bevy_ratatui::{
 fn main() {    
     let frame_rate = Duration::from_secs_f64(1.0/60.0);
     App::new()
-        .add_plugins(RatatuiPlugins::default())
+        .add_plugins(bevy::log::LogPlugin::default())
+        .add_plugins(RatatuiPlugins{
+            enable_mouse_capture: true,
+            ..default()
+        })        
         .add_plugins(MinimalPlugins.set(ScheduleRunnerPlugin::run_loop(frame_rate)))
         .add_plugins(StatesPlugin)        
         .init_state::<AppState>()

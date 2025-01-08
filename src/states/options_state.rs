@@ -1,6 +1,6 @@
 use bevy::prelude::States;
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States, Copy)]
 pub enum OptionsState {
     #[default]
     None,
