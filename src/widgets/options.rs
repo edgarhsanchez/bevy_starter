@@ -7,9 +7,9 @@ use bevy_ratatui::{
 use crossterm::event::KeyEventKind;
 use ratatui::{
     buffer::Buffer,
-    layout::{Constraint, Direction, Layout},
+    layout::{Alignment, Constraint, Direction, Flex, Layout},
     style::{Color, Style},
-    widgets::{Block, Borders, WidgetRef},
+    widgets::{Block, Borders, Paragraph, WidgetRef},
 };
 
 use crate::states::{
@@ -40,43 +40,42 @@ impl WidgetRef for OptionsState {
     fn render_ref(&self, area: Rect, buf: &mut Buffer) {
         let sub_area = Layout::default()
             .direction(Direction::Horizontal)
+            .flex(Flex::Center)
             .constraints([
                 // Area for Options
-                Constraint::Length(50),
+                Constraint::Length(25),
             ])
+            .margin(4)
             .split(area);
         Block::default()
             .title("Options")
             .borders(Borders::ALL)
-            .render_ref(sub_area[0], buf);
+            .render_ref(area, buf);
 
-        // create area chunk with vertical split
+        // Add margin at top and bottom for vertical centering
         let vertical_chunks = Layout::default()
             .direction(Direction::Vertical)
             .constraints([
-                // Area for New Game Button
-                Constraint::Length(10),
-                // Area for Key Bindings Button
-                Constraint::Length(10),
-                // Area for Video Button
-                Constraint::Length(10),
-                // Area for Audio Button
-                Constraint::Length(10),
-                // Area for Back Button
-                Constraint::Length(10),
+                Constraint::Percentage(20), // Top margin
+                Constraint::Length(3),      // New Game
+                Constraint::Length(1),      // Spacing
+                Constraint::Length(3),      // Key Bindings
+                Constraint::Length(1),      // Spacing
+                Constraint::Length(3),      // Video
+                Constraint::Length(1),      // Spacing
+                Constraint::Length(3),      // Audio
+                Constraint::Length(1),      // Spacing
+                Constraint::Length(3),      // Back
+                Constraint::Percentage(20), // Bottom margin
             ])
             .split(sub_area[0]);
 
-        // render New Game Button
-        self.render_new_game_button(vertical_chunks[0], buf);
-        // render Key Bindings Button
-        self.render_key_bindings_button(vertical_chunks[1], buf);
-        // render Video Button
-        self.render_video_button(vertical_chunks[2], buf);
-        // render Audio Button
-        self.render_audio_button(vertical_chunks[3], buf);
-        // render Back Button
-        self.render_back_button(vertical_chunks[4], buf);
+        // Render buttons with centered alignment
+        self.render_new_game_button(vertical_chunks[1], buf);
+        self.render_key_bindings_button(vertical_chunks[3], buf);
+        self.render_video_button(vertical_chunks[5], buf);
+        self.render_audio_button(vertical_chunks[7], buf);
+        self.render_back_button(vertical_chunks[9], buf);
     }
 }
 
@@ -142,32 +141,27 @@ impl OptionsState {
                 Style::default().fg(Color::White).bg(Color::Black),
             ),
         };
-        Block::default()
-            .title(title)
-            .borders(Borders::ALL)
+        Paragraph::new(title)
+            .block(Block::default().borders(Borders::ALL))
             .style(style)
+            .alignment(Alignment::Center)
             .render_ref(area, buf);
+
     }
 
     fn render_key_bindings_button(&self, area: Rect, buf: &mut Buffer) {
         let (title, style) = match self {
-            OptionsState::KeyBindingsOver => (
-                "Key Bindings",
-                Style::default().fg(Color::Black).bg(Color::White),
-            ),
-            OptionsState::KeyBindingsDown => (
-                "Key Bindings",
-                Style::default().fg(Color::White).bg(Color::Black),
-            ),
-            _ => (
-                "Key Bindings",
-                Style::default().fg(Color::White).bg(Color::Black),
-            ),
+            OptionsState::KeyBindingsOver => {
+                ("Key Bindings", Style::default().fg(Color::Black).bg(Color::White))
+            }
+            OptionsState::KeyBindingsDown => {
+                ("Key Bindings", Style::default().fg(Color::White).bg(Color::Black))
+            }
+            _ => ("Key Bindings", Style::default().fg(Color::White).bg(Color::Black)),
         };
-        Block::default()
-            .title(title)
-            .borders(Borders::ALL)
+        Paragraph::new(title).block(Block::default().borders(Borders::ALL))
             .style(style)
+            .alignment(Alignment::Center)
             .render_ref(area, buf);
     }
 
@@ -181,11 +175,12 @@ impl OptionsState {
             }
             _ => ("Video", Style::default().fg(Color::White).bg(Color::Black)),
         };
-        Block::default()
-            .title(title)
-            .borders(Borders::ALL)
+        Paragraph::new(title).block(Block::default().borders(Borders::ALL))
             .style(style)
+            .alignment(Alignment::Center)
             .render_ref(area, buf);
+
+
     }
 
     fn render_audio_button(&self, area: Rect, buf: &mut Buffer) {
@@ -198,23 +193,25 @@ impl OptionsState {
             }
             _ => ("Audio", Style::default().fg(Color::White).bg(Color::Black)),
         };
-        Block::default()
-            .title(title)
-            .borders(Borders::ALL)
+        Paragraph::new(title).block(Block::default().borders(Borders::ALL))
             .style(style)
+            .alignment(Alignment::Center)
             .render_ref(area, buf);
     }
 
     fn render_back_button(&self, area: Rect, buf: &mut Buffer) {
         let (title, style) = match self {
-            OptionsState::BackOver => ("Back", Style::default().fg(Color::Black).bg(Color::White)),
-            OptionsState::BackDown => ("Back", Style::default().fg(Color::White).bg(Color::Black)),
+            OptionsState::BackOver => {
+                ("Back", Style::default().fg(Color::Black).bg(Color::White))
+            }
+            OptionsState::BackDown => {
+                ("Back", Style::default().fg(Color::White).bg(Color::Black))
+            }
             _ => ("Back", Style::default().fg(Color::White).bg(Color::Black)),
         };
-        Block::default()
-            .title(title)
-            .borders(Borders::ALL)
+        Paragraph::new(title).block(Block::default().borders(Borders::ALL))
             .style(style)
+            .alignment(Alignment::Center)
             .render_ref(area, buf);
     }
 }
