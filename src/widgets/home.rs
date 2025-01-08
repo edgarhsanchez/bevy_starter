@@ -9,8 +9,7 @@ use ratatui::{
     widgets::{WidgetRef, Block, Borders},
 };
 
-use crate::states::app_state::{self, AppState};
-use crate::states::home_state::HomeState;
+use crate::states::app_state::AppState;
 
 pub struct HomeWidget;
 

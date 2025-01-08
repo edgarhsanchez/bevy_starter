@@ -14,12 +14,12 @@ mod states {
     pub mod app_state;
     pub mod options_state;
 }
-use std::time::Duration;
+use std::{io::stdout, time::Duration, error::Error};
 
 use states::app_state::AppState;
 use widgets::{home::{HomeEvent, HomePlugin}, options::{OptionsEvent, OptionsPlugin}};
 
-use crossterm::event::{KeyCode, KeyEventKind, MouseEventKind};
+use crossterm::{cursor::{DisableBlinking, EnableBlinking, SetCursorStyle}, event::{DisableBracketedPaste, DisableMouseCapture, EnableBracketedPaste, EnableMouseCapture, KeyCode, KeyEventKind, MouseEventKind}, terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen}, ExecutableCommand};
 use bevy::{
     app::{AppExit, ScheduleRunnerPlugin},
     prelude::*, 
@@ -29,8 +29,14 @@ use bevy_ratatui::{
     error::exit_on_error, event::{KeyEvent, MouseEvent}, terminal::RatatuiContext, RatatuiPlugins,
 };
 
-fn main() {    
+fn main() -> Result<(), Box<dyn Error>> {    
     let frame_rate = Duration::from_secs_f64(1.0/60.0);
+    stdout().execute(EnterAlternateScreen)?;
+    stdout().execute(EnableMouseCapture)?;
+    stdout().execute(EnableBlinking)?;
+    stdout().execute(SetCursorStyle::BlinkingBar)?;
+    stdout().execute(EnableBracketedPaste)?;
+    enable_raw_mode()?;
     App::new()
         .add_plugins(bevy::log::LogPlugin::default())
         .add_plugins(RatatuiPlugins{
@@ -45,6 +51,14 @@ fn main() {
         .add_systems(PreUpdate, keyboard_events_handler)
         .add_systems(PreUpdate, mouse_events_handler)
         .run();
+
+        disable_raw_mode()?;
+        stdout().execute(DisableBracketedPaste)?;
+        stdout().execute(SetCursorStyle::DefaultUserShape)?;
+        stdout().execute(DisableBlinking)?;
+        stdout().execute(DisableMouseCapture)?;
+        stdout().execute(LeaveAlternateScreen)?;
+        Ok(())
 }
 
 fn mouse_events_handler(

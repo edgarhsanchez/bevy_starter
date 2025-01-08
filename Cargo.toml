@@ -16,7 +16,6 @@ bevy = { version = "0.15", default-features = false, features = [
     "bevy_state",
 ] }
 bevy_ratatui = "0.7.0"
-bevy_states = "0.0.1"
 bitflags = "2.6.0"
 color-eyre = "0.6.3"
 crossterm = "0.28.1"
