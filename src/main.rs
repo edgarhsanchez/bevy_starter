@@ -1,19 +1,23 @@
 mod widgets {
-    pub mod prelude;
-    pub mod key_bindings;
+    pub mod home;
     pub mod options;
+    pub mod key_bindings;
 }
 
-mod app_state;
 
 mod mini_salsa {
     pub mod theme;
 }
 
+mod states {
+    pub mod home_state;
+    pub mod app_state;
+    pub mod options_state;
+}
 use std::time::Duration;
 
-use app_state::{AppPlugin, AppState, HomeEvent};
-use widgets::{options::OptionsEvent, prelude::*};
+use states::app_state::AppState;
+use widgets::{home::{HomeEvent, HomePlugin}, options::{OptionsEvent, OptionsPlugin}};
 
 use crossterm::event::{KeyCode, KeyEventKind, MouseEventKind};
 use bevy::{
@@ -31,7 +35,8 @@ fn main() {
         .add_plugins(RatatuiPlugins::default())
         .add_plugins(MinimalPlugins.set(ScheduleRunnerPlugin::run_loop(frame_rate)))
         .add_plugins(StatesPlugin)        
-        .add_plugins(AppPlugin)    
+        .init_state::<AppState>()
+        .add_plugins(HomePlugin)    
         .add_plugins(OptionsPlugin)    
         .add_systems(PreUpdate, keyboard_events_handler)
         .add_systems(PreUpdate, mouse_events_handler)

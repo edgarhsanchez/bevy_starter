@@ -41,7 +41,7 @@ impl Default for KeyBinding {
 }
 
 #[derive(Debug, Default, Resource, Deref, DerefMut, Clone)]
-pub struct KeyBindings {
+pub struct KeyBindingsWidget {
     pub key_bindings:
         HashMap<(crossterm::event::KeyCode, crossterm::event::KeyModifiers), KeyBinding>,
     pub rect: Rect,
@@ -50,7 +50,7 @@ pub struct KeyBindings {
     pub lead_row: Option<usize>,
 }
 
-impl KeyBindings {
+impl KeyBindingsWidget {
     pub fn new() -> Self {
         Self {
             key_bindings: HashMap::new(),
@@ -65,7 +65,7 @@ impl KeyBindings {
     }
 }
 
-impl TableSelection for KeyBindings {
+impl TableSelection for KeyBindingsWidget {
     fn is_selected_row(&self, row: usize) -> bool {
         self.lead_row == Some(row)
     }
@@ -178,7 +178,7 @@ pub trait KeyBindingsTrait {
     fn add_custom_key_binding(&mut self, key_binding: KeyBinding) -> Result<(), anyhow::Error>;
 }
 
-impl KeyBindingsTrait for KeyBindings {
+impl KeyBindingsTrait for KeyBindingsWidget {
     fn convert_to_system_key_binding(
         &self,
         user_key: crossterm::event::KeyCode,
@@ -209,7 +209,7 @@ impl KeyBindingsTrait for KeyBindings {
     }
 }
 
-impl StatefulWidgetRef for KeyBindings {
+impl StatefulWidgetRef for KeyBindingsWidget {
     type State = KeyBindingsState;
 
     fn render_ref(&self, area: Rect, buf: &mut Buffer, state: &mut Self::State) {

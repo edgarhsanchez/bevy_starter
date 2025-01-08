@@ -9,12 +9,10 @@ use ratatui::{
     widgets::{WidgetRef, Block, Borders},
 };
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Default, States)]
-pub enum AppState {
-    #[default]
-    Home,
-    Options,
-}
+use crate::states::app_state::{self, AppState};
+use crate::states::home_state::HomeState;
+
+pub struct HomeWidget;
 
 #[derive(Debug, Clone, Event, PartialEq, Eq)]
 pub enum HomeEvent {
@@ -22,25 +20,20 @@ pub enum HomeEvent {
     KeyEvent(KeyEvent),
 }
 
-impl WidgetRef for AppState {
+impl WidgetRef for HomeWidget {
     fn render_ref(&self, area: Rect, buf: &mut Buffer) {        
-        match self {
-            AppState::Home | AppState::Options => {
-                Block::default()
-                .title("Home")
-                .borders(Borders::ALL)
-                .render_ref(area, buf);
-            }
-        }
+        Block::default()
+            .title("Home")
+            .borders(Borders::ALL)
+            .render_ref(area, buf);
     }
 }
 
-pub struct AppPlugin;
+pub struct HomePlugin;
 
-impl Plugin for AppPlugin {
+impl Plugin for HomePlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<HomeEvent>()
-            .init_state::<AppState>()
+        app.add_event::<HomeEvent>()            
             .add_systems(PreUpdate, home_events_handler)
             .add_systems(Update, render_home.pipe(exit_on_error));
     }
@@ -50,14 +43,19 @@ fn render_home(
     app_state: Res<State<AppState>>,
     mut context: ResMut<RatatuiContext>,
 ) -> color_eyre::Result<()> {
+    let app_state = app_state.get();
+    if app_state != &AppState::Home {
+        return Ok(());
+    }
     context.draw(|frame| {
         let area = frame.area();
-        frame.render_widget(app_state.get(), area);
+        frame.render_widget_ref(HomeWidget, area);
     })?;
     Ok(())
 }
 
 fn home_events_handler(    
+    mut app_state: ResMut<NextState<AppState>>,
     mut home_events: EventReader<HomeEvent>,
     mut app_exit: EventWriter<AppExit>,
 ) {
@@ -70,8 +68,11 @@ fn home_events_handler(
                 match key_event.kind {
                     KeyEventKind::Release => {
                         match key_event.code {
-                            crossterm::event::KeyCode::Char('q') | crossterm::event::KeyCode::Esc => {
+                            crossterm::event::KeyCode::Char('q') => {
                                 app_exit.send_default();
+                            }
+                            crossterm::event::KeyCode::Esc => {
+                                app_state.set(AppState::Options);
                             }
                             _ => {}
                         }
